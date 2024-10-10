@@ -11,3 +11,15 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
+
+module "networking" {
+  source   = "../../modules/networking"
+  for_each = var.vpcs
+
+  vpc_cidr             = each.value.cidr_block
+  public_subnet_cidrs  = each.value.public_subnet_cidrs
+  private_subnet_cidrs = each.value.private_subnet_cidrs
+  availability_zones   = var.availability_zones
+  environment          = var.environment
+  vpc_name             = each.key
+}
