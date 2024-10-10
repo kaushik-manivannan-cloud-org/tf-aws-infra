@@ -47,3 +47,27 @@ resource "aws_subnet" "private" {
     Environment = var.environment
   }
 }
+
+# Create route tables
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = {
+    Name        = "${var.vpc_name}-public-rt-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.vpc_name}-private-rt-${var.environment}"
+    Environment = var.environment
+  }
+}
