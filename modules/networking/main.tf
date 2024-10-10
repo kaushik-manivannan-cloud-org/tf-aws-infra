@@ -11,3 +11,13 @@ resource "aws_vpc" "main" {
     Environment = var.environment
   }
 }
+
+# Create an Internet Gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.vpc_name}-igw-${var.environment}"
+    Environment = var.environment
+  }
+}
