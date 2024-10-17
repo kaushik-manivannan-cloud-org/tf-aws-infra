@@ -23,3 +23,14 @@ module "networking" {
   environment          = var.environment
   vpc_name             = each.key
 }
+
+module "ec2" {
+  source = "../../modules/ec2"
+
+  environment      = var.environment
+  vpc_id           = module.networking["main-vpc"].vpc_id
+  subnet_id        = module.networking["main-vpc"].public_subnet_ids[0]
+  ami_id           = var.ami_id
+  instance_type    = var.instance_type
+  application_port = var.application_port
+}
