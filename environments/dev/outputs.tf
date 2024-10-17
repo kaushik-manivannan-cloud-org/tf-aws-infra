@@ -42,3 +42,13 @@ output "private_route_table_ids" {
   description = "Map of private route table IDs for each VPC"
   value       = { for k, v in module.networking : k => v.private_route_table_id }
 }
+
+output "ec2_instance_id" {
+  description = "ID of the EC2 instance"
+  value       = module.ec2.instance_id
+}
+
+output "application_security_group_id" {
+  description = "ID of the application security group"
+  value       = module.ec2.security_group_id
+}
