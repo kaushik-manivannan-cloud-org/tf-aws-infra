@@ -51,3 +51,24 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
+
+resource "aws_instance" "app_server" {
+  ami           = var.ami_id
+  instance_type = var.instance_type
+  subnet_id     = var.subnet_id
+
+  vpc_security_group_ids = [aws_security_group.application.id]
+
+  root_block_device {
+    volume_size = 25
+    volume_type = "gp2"
+    encrypted   = true
+  }
+
+  disable_api_termination = false
+
+  tags = {
+    Name        = "${var.environment}-app-server"
+    Environment = var.environment
+  }
+}
