@@ -63,6 +63,7 @@ resource "aws_instance" "app_server" {
     volume_size = 25
     volume_type = "gp2"
     encrypted   = true
+    delete_on_termination = true
   }
 
   disable_api_termination = false
