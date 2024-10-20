@@ -36,3 +36,8 @@ variable "application_port" {
   description = "Port on which the application runs"
   type        = number
 }
+
+variable "database_port" {
+  description = "Port on which the database runs"
+  type        = number
+}
