@@ -33,6 +33,13 @@ module "ec2" {
   ami_id           = var.ami_id
   instance_type    = var.instance_type
   application_port = var.application_port
+  user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
+    db_host     = module.rds.db_instance_endpoint
+    db_port     = module.rds.db_instance_port
+    db_name     = module.rds.db_instance_name
+    db_username = module.rds.db_instance_username
+    db_password = var.db_password
+  }))
 }
 
 module "rds" {
