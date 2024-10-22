@@ -57,7 +57,9 @@ resource "aws_instance" "app_server" {
   instance_type = var.instance_type
   subnet_id     = var.subnet_id
 
-  vpc_security_group_ids = [aws_security_group.application.id]
+  vpc_security_group_ids      = [aws_security_group.application.id]
+  user_data_base64            = var.user_data
+  user_data_replace_on_change = true
 
   root_block_device {
     volume_size           = 25
