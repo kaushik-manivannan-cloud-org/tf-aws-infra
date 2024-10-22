@@ -36,3 +36,44 @@ variable "application_port" {
   description = "Port on which the application runs"
   type        = number
 }
+
+variable "database_port" {
+  description = "Port on which the database runs"
+  type        = number
+}
+
+variable "db_parameter_group_family" {
+  description = "The family of the DB parameter group"
+  type        = string
+}
+
+variable "db_engine" {
+  description = "The database engine to use"
+  type        = string
+}
+
+variable "db_engine_version" {
+  description = "The engine version to use"
+  type        = string
+}
+
+variable "db_instance_class" {
+  description = "The instance type of the RDS instance"
+  type        = string
+}
+
+variable "db_name" {
+  description = "The name of the database"
+  type        = string
+}
+
+variable "db_username" {
+  description = "Username for the master DB user"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Password for the master DB user"
+  type        = string
+  sensitive   = true
+}

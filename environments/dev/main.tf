@@ -34,3 +34,20 @@ module "ec2" {
   instance_type    = var.instance_type
   application_port = var.application_port
 }
+
+module "rds" {
+  source = "../../modules/rds"
+
+  environment                   = var.environment
+  vpc_id                        = module.networking["main-vpc"].vpc_id
+  database_port                 = var.database_port
+  application_security_group_id = module.ec2.security_group_id
+  db_parameter_group_family     = var.db_parameter_group_family
+  private_subnet_ids            = module.networking["main-vpc"].private_subnet_ids
+  db_engine                     = var.db_engine
+  db_engine_version             = var.db_engine_version
+  db_instance_class             = var.db_instance_class
+  db_name                       = var.db_name
+  db_username                   = var.db_username
+  db_password                   = var.db_password
+}
