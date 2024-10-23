@@ -34,7 +34,7 @@ module "ec2" {
   instance_type    = var.instance_type
   application_port = var.application_port
   user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
-    db_host     = module.rds.db_instance_endpoint
+    db_host     = split(":", module.rds.db_instance_endpoint)[0]
     db_port     = module.rds.db_instance_port
     db_name     = module.rds.db_instance_name
     db_username = module.rds.db_instance_username
