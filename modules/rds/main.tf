@@ -69,6 +69,7 @@ resource "aws_db_instance" "database" {
   engine         = var.db_engine
   engine_version = var.db_engine_version
   instance_class = var.db_instance_class
+  port           = var.database_port
 
   # Storage Configuration
   allocated_storage = 10
@@ -88,7 +89,8 @@ resource "aws_db_instance" "database" {
   parameter_group_name = aws_db_parameter_group.database.name
 
   # Backup and Maintenance
-  multi_az = false
+  multi_az            = false
+  skip_final_snapshot = true
 
   tags = {
     Name        = "${var.environment}-database"

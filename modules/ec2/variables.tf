@@ -27,3 +27,9 @@ variable "application_port" {
   description = "Port on which the application runs"
   type        = number
 }
+
+variable "user_data" {
+  description = "Base64-encoded user data for EC2 instance"
+  type        = string
+  default     = null
+}
