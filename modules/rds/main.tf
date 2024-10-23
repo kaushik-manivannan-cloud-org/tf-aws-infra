@@ -90,6 +90,7 @@ resource "aws_db_instance" "database" {
 
   # Backup and Maintenance
   multi_az = false
+  skip_final_snapshot = true
 
   tags = {
     Name        = "${var.environment}-database"
