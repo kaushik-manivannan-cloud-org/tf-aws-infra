@@ -89,7 +89,7 @@ resource "aws_db_instance" "database" {
   parameter_group_name = aws_db_parameter_group.database.name
 
   # Backup and Maintenance
-  multi_az = false
+  multi_az            = false
   skip_final_snapshot = true
 
   tags = {
