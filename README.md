@@ -1,100 +1,183 @@
-# AWS Infrastructure with Terraform
+# AWS Infrastructure as Code with Terraform
 
-This project uses Terraform to set up AWS networking infrastructure, including VPCs, subnets, internet gateways, and route tables.
+A comprehensive Infrastructure as Code (IaC) solution for deploying a multi-tier application infrastructure on AWS using Terraform. This project sets up a complete networking stack, application servers, and database infrastructure following AWS best practices.
+
+## Table of Contents
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Directory Structure](#directory-structure)
+- [Module Description](#module-description)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [CI/CD Integration](#cicd-integration)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+
+## Overview
+
+This Terraform project creates a production-ready AWS infrastructure with:
+- Multi-AZ VPC setup with public and private subnets
+- EC2 instances for application hosting
+- RDS PostgreSQL database in private subnets
+- Security groups with least-privilege access
+- Proper network isolation and routing
+
+## Architecture
+
+```plaintext
+├── VPC (10.0.0.0/16)
+│   ├── Public Subnets
+│   │   ├── 10.0.1.0/24 (us-east-1a)
+│   │   ├── 10.0.2.0/24 (us-east-1b)
+│   │   └── 10.0.3.0/24 (us-east-1c)
+│   └── Private Subnets
+│       ├── 10.0.4.0/24 (us-east-1a)
+│       ├── 10.0.5.0/24 (us-east-1b)
+│       └── 10.0.6.0/24 (us-east-1c)
+├── EC2 Instances
+│   └── Application Server (t2.small)
+└── RDS
+    └── PostgreSQL Database (db.t3.medium)
+```
 
 ## Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) (version 1.9.0 or later)
-- [AWS CLI](https://aws.amazon.com/cli/) installed and configured with appropriate credentials
-- An AWS account with necessary permissions to create networking resources
+- Terraform >= 1.9.0
+- AWS CLI configured with appropriate credentials
+- Access to AWS account with necessary permissions
+
+## Directory Structure
+
+```
+tf-aws-infra/
+├── environments/
+│   └── dev/
+│       ├── main.tf         # Main configuration
+│       ├── variables.tf    # Variable definitions
+│       ├── terraform.tfvars # Variable values
+│       └── outputs.tf      # Output definitions
+├── modules/
+│   ├── networking/        # VPC and network resources
+│   ├── ec2/              # EC2 instance resources
+│   └── rds/              # RDS instance resources
+└── .github/
+    └── workflows/         # CI/CD configurations
+```
+
+## Module Description
+
+### Networking Module
+- Creates VPC with specified CIDR block
+- Sets up public and private subnets across multiple AZs
+- Configures Internet Gateway and route tables
+- Implements network ACLs and security groups
+
+### EC2 Module
+- Launches application instances in public subnets
+- Configures security groups for application access
+- Sets up instance profiles and IAM roles
+- Manages user data for instance configuration
+
+### RDS Module
+- Deploys PostgreSQL RDS instance in private subnets
+- Configures database security groups
+- Sets up parameter groups and subnet groups
+- Manages backup and maintenance windows
 
 ## Configuration
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/kaushik-manivannan/tf-aws-infra.git
-   cd tf-aws-infra
-   ```
+1. Create a `terraform.tfvars` file in your environment directory:
+```hcl
+aws_region  = "us-east-1"
+environment = "dev"
 
-2. Navigate to the environment you want to work with:
-   ```
-   cd environments/dev
-   ```
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
-3. Update the `terraform.tfvars` file with your desired configuration:
-   ```hcl
-   aws_region  = "us-east-1"
-   environment = "dev"
+vpcs = {
+  main-vpc = {
+    cidr_block           = "10.0.0.0/16"
+    public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+    private_subnet_cidrs = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+  },
+  # vpc2 = {
+  #   cidr_block           = "10.1.0.0/16"
+  #   public_subnet_cidrs  = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+  #   private_subnet_cidrs = ["10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"]
+  # }
+}
 
-   vpcs = {
-     vpc1 = {
-       cidr_block           = "10.0.0.0/16"
-       public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-       private_subnet_cidrs = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
-     }
-   }
-   ```
+ami_id                    = "ami-0f448c9764a39658f"
+instance_type             = "t2.small"
+application_port          = 3000
+database_port             = 5432
+db_parameter_group_family = "postgres14"
+db_engine                 = "postgres"
+db_engine_version         = "14.13" # or your preferred version
+db_instance_class         = "db.t3.medium"
+db_name                   = "your_db_name"
+db_username               = "your_db_username"
+db_password               = "your_db_password"
+```
 
 ## Usage
 
-1. Initialize Terraform:
-   ```
-   terraform init
-   ```
-
-2. Preview the changes:
-   ```
-   terraform plan
-   ```
-
-3. Apply the changes:
-   ```
-   terraform apply
-   ```
-
-4. When prompted, type `yes` to confirm and create the resources.
-
-## Adding or Modifying VPCs
-
-To add or modify VPCs, update the `vpcs` map in the `terraform.tfvars` file. For example, to add a second VPC:
-
-```hcl
-vpcs = {
-  vpc1 = { ... },
-  vpc2 = {
-    cidr_block           = "10.1.0.0/16"
-    public_subnet_cidrs  = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
-    private_subnet_cidrs = ["10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"]
-  }
-}
+1. Move to the dev directory:
+```bash
+cd environments/dev
 ```
 
-After modifying the `terraform.tfvars` file, run `terraform plan` and `terraform apply` to implement the changes.
+2. Initialize Terraform:
+```bash
+terraform init
+```
 
-## Outputs
+3. Review the plan:
+```bash
+terraform plan
+```
 
-After applying the Terraform configuration, you'll see outputs including:
+4. Apply the configuration:
+```bash
+terraform apply
+```
 
-- VPC IDs
-- Subnet IDs
-- Internet Gateway IDs
-- Route Table IDs
+## CI/CD Integration
 
-These outputs are helpful for reference and for use in other parts of your infrastructure.
+The project includes GitHub Actions workflows for:
+- Terraform format checking
+- Configuration validation
+- Infrastructure deployment
+- Security scanning
 
-## Terraform Commands
+## Best Practices
 
-- `terraform init`: Initialize the Terraform working directory
-- `terraform plan`: Preview changes
-- `terraform apply`: Apply changes
-- `terraform destroy`: Destroy all created resources (use with caution)
-- `terraform output`: View all outputs
-- `terraform show`: Show the current state of the infrastructure
+1. **State Management**
+   - Use remote state storage
+   - Enable state locking
+   - Implement state encryption
+
+2. **Security**
+   - Implement least privilege access
+   - Use security groups effectively
+   - Encrypt sensitive data
+
+3. **Networking**
+   - Implement proper subnet sizing
+   - Use proper CIDR block allocation
+   - Configure route tables correctly
 
 ## Troubleshooting
 
-- If you encounter errors related to AWS credentials, ensure your AWS CLI is correctly configured.
-- For "resource already exists" errors, make sure you're not trying to create resources that already exist in your AWS account.
-- If Terraform seems stuck or frozen, check your internet connection and AWS console for any ongoing operations.
+Common issues and solutions:
+1. **Subnet Issues**
+   - Ensure CIDR blocks don't overlap
+   - Verify AZ availability
 
-For more help, consult the [Terraform documentation](https://www.terraform.io/docs/index.html) or open an issue in this repository.
+2. **Security Group Problems**
+   - Check ingress/egress rules
+   - Verify security group references
+
+3. **RDS Connectivity**
+   - Confirm subnet group configuration
+   - Verify security group rules
