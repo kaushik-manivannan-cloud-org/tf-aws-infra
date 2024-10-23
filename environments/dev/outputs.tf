@@ -1,3 +1,4 @@
+# Networking Outputs
 output "vpc_ids" {
   description = "Map of VPC IDs"
   value       = { for k, v in module.networking : k => v.vpc_id }
@@ -43,6 +44,7 @@ output "private_route_table_ids" {
   value       = { for k, v in module.networking : k => v.private_route_table_id }
 }
 
+# EC2 Outputs
 output "ec2_instance_id" {
   description = "ID of the EC2 instance"
   value       = module.ec2.instance_id
@@ -51,4 +53,25 @@ output "ec2_instance_id" {
 output "application_security_group_id" {
   description = "ID of the application security group"
   value       = module.ec2.security_group_id
+}
+
+# RDS Outputs
+output "rds_endpoint" {
+  description = "The connection endpoint for the RDS instance"
+  value       = module.rds.db_instance_endpoint
+}
+
+output "rds_port" {
+  description = "The port the RDS instance is listening on"
+  value       = module.rds.db_instance_port
+}
+
+output "rds_name" {
+  description = "The name of the RDS database"
+  value       = module.rds.db_instance_name
+}
+
+output "database_security_group_id" {
+  description = "ID of the database security group"
+  value       = module.rds.security_group_id
 }
