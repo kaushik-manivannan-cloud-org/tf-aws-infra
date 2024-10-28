@@ -64,4 +64,11 @@ module "s3" {
 
   environment                   = var.environment
 }
+
+module "dns" {
+  source = "../../modules/dns"
+
+  instance_public_ip = module.ec2.instance_public_ip
+  environment = var.environment
+  domain_name = var.domain_name
 }
