@@ -50,5 +50,9 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOL'
 }
 EOL
 
+# Start/Restart CloudWatch agent with new configuration
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+systemctl restart amazon-cloudwatch-agent
+
 # Restart the service to pick up new environment variables
 systemctl restart webapp.service
