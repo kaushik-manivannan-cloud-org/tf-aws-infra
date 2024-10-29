@@ -18,7 +18,7 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOL'
 {
   "agent": {
     "metrics_collection_interval": 60,
-    "run_as_user": "root",
+    "run_as_user": "csye6225"
   },
   "logs": {
     "logs_collected": {
