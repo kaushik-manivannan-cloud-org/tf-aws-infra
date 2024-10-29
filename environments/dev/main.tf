@@ -72,3 +72,10 @@ module "dns" {
   environment = var.environment
   domain_name = var.domain_name
 }
+
+module "iam" {
+  source = "../../modules/iam"
+
+  environment = var.environment
+  s3_bucket_arn = module.s3.bucket_arn
+}
