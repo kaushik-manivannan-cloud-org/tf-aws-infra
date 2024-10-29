@@ -35,11 +35,13 @@ module "ec2" {
   application_port     = var.application_port
   iam_instance_profile = module.iam.instance_profile_name
   user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
-    db_host     = split(":", module.rds.db_instance_endpoint)[0]
-    db_port     = module.rds.db_instance_port
-    db_name     = module.rds.db_instance_name
-    db_username = module.rds.db_instance_username
-    db_password = var.db_password
+    db_host        = split(":", module.rds.db_instance_endpoint)[0]
+    db_port        = module.rds.db_instance_port
+    db_name        = module.rds.db_instance_name
+    db_username    = module.rds.db_instance_username
+    db_password    = var.db_password
+    aws_region     = var.aws_region
+    s3_bucket_name = module.s3.bucket_name
   }))
 }
 

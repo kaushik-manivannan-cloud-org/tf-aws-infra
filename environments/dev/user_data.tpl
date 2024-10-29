@@ -7,6 +7,8 @@ DB_PORT=${db_port}
 DB_NAME=${db_name}
 DB_USER=${db_username}
 DB_PASSWORD=${db_password}
+AWS_REGION=${aws_region}
+S3_BUCKET_NAME=${s3_bucket_name}
 EOL
 
 # Set proper permissions
