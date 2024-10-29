@@ -4,7 +4,7 @@ data "aws_route53_zone" "selected" {
 }
 
 resource "aws_route53_record" "app" {
-  zone_id = aws_route53_zone.selected.zone_id
+  zone_id = data.aws_route53_zone.selected.zone_id
   name    = "${var.environment}.${var.domain_name}"
   type    = "A"
   ttl     = 300
