@@ -44,7 +44,7 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOL'
       },
       "collectd": {
         "metrics_aggregation_interval": 60
-      },
+      }
     }
   }
 }
