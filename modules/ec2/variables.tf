@@ -33,3 +33,8 @@ variable "user_data" {
   type        = string
   default     = null
 }
+
+variable "iam_instance_profile" {
+  description = "Name of the IAM instance profile"
+  type        = string
+}
