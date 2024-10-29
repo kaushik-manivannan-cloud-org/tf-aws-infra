@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Configure application environment variables
 cat > /opt/webapp/.env << EOL
 DB_HOST=${db_host}
 DB_PORT=${db_port}
