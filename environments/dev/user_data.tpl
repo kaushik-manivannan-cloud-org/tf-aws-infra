@@ -28,8 +28,7 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOL'
             "file_path": "/tmp/logs/app.log",
             "log_group_name": "/webapp/app.log",
             "log_stream_name": "{instance_id}",
-            "timestamp_format": "%Y-%m-%d %H:%M:%S",
-            "multi_line_start_pattern": "{timestamp_format}"
+            "encoding": "utf-8"
           }
         ]
       }
