@@ -58,6 +58,7 @@ resource "aws_instance" "app_server" {
   subnet_id     = var.subnet_id
 
   vpc_security_group_ids      = [aws_security_group.application.id]
+  iam_instance_profile        = var.iam_instance_profile
   user_data_base64            = var.user_data
   user_data_replace_on_change = true
 
