@@ -15,43 +15,6 @@ EOL
 chown csye6225:csye6225 /opt/webapp/.env
 chmod 600 /opt/webapp/.env
 
-# Create CloudWatch Agent configuration
-cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOL'
-{
-  "agent": {
-    "metrics_collection_interval": 60,
-    "run_as_user": "csye6225"
-  },
-  "logs": {
-    "logs_collected": {
-      "files": {
-        "collect_list": [
-          {
-            "file_path": "/tmp/logs/app.log",
-            "log_group_name": "/webapp/app.log",
-            "log_stream_name": "{instance_id}",
-            "encoding": "utf-8"
-          }
-        ]
-      }
-    }
-  },
-  "metrics": {
-    "namespace": "WebApp",
-    "metrics_collected": {
-      "statsd": {
-        "service_address": ":8125",
-        "metrics_collection_interval": 10,
-        "metrics_aggregation_interval": 60
-      },
-      "collectd": {
-        "metrics_aggregation_interval": 60
-      }
-    }
-  }
-}
-EOL
-
 # Start/Restart CloudWatch agent with new configuration
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 systemctl restart amazon-cloudwatch-agent
