@@ -38,3 +38,8 @@ variable "iam_instance_profile" {
   description = "Name of the IAM instance profile"
   type        = string
 }
+
+variable "alb_security_group_id" {
+  description = "ID of the security group for the application load balancer"
+  type        = string
+}

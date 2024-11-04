@@ -37,12 +37,13 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "application" {
-  security_group_id = aws_security_group.application.id
-  description       = "Allow application port access"
-  from_port         = var.application_port
-  to_port           = var.application_port
-  ip_protocol       = "tcp"
-  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id            = aws_security_group.application.id
+  description                  = "Allow application port access"
+  from_port                    = var.application_port
+  to_port                      = var.application_port
+  ip_protocol                  = "tcp"
+  cidr_ipv4                    = "0.0.0.0/0"
+  referenced_security_group_id = var.alb_security_group_id
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all" {

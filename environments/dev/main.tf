@@ -27,13 +27,14 @@ module "networking" {
 module "ec2" {
   source = "../../modules/ec2"
 
-  environment          = var.environment
-  vpc_id               = module.networking["main-vpc"].vpc_id
-  subnet_id            = module.networking["main-vpc"].public_subnet_ids[0]
-  ami_id               = var.ami_id
-  instance_type        = var.instance_type
-  application_port     = var.application_port
-  iam_instance_profile = module.iam.instance_profile_name
+  environment           = var.environment
+  vpc_id                = module.networking["main-vpc"].vpc_id
+  subnet_id             = module.networking["main-vpc"].public_subnet_ids[0]
+  ami_id                = var.ami_id
+  instance_type         = var.instance_type
+  application_port      = var.application_port
+  iam_instance_profile  = module.iam.instance_profile_name
+  alb_security_group_id = module.alb.security_group_id
   user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
     db_host        = split(":", module.rds.db_instance_endpoint)[0]
     db_port        = module.rds.db_instance_port
@@ -81,4 +82,11 @@ module "iam" {
 
   environment   = var.environment
   s3_bucket_arn = module.s3.bucket_arn
+}
+
+module "alb" {
+  source = "../../modules/alb"
+
+  environment       = var.environment
+  vpc_id            = module.networking["main-vpc"].vpc_id
 }
