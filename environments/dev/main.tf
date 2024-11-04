@@ -87,6 +87,8 @@ module "iam" {
 module "alb" {
   source = "../../modules/alb"
 
-  environment       = var.environment
-  vpc_id            = module.networking["main-vpc"].vpc_id
+  environment                   = var.environment
+  vpc_id                        = module.networking["main-vpc"].vpc_id
+  public_subnet_ids             = module.networking["main-vpc"].public_subnet_ids
+  application_port              = var.application_port
 }
