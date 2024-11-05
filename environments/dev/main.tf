@@ -87,8 +87,30 @@ module "iam" {
 module "alb" {
   source = "../../modules/alb"
 
+  environment       = var.environment
+  vpc_id            = module.networking["main-vpc"].vpc_id
+  public_subnet_ids = module.networking["main-vpc"].public_subnet_ids
+  application_port  = var.application_port
+}
+
+module "asg" {
+  source = "../../modules/asg"
+
   environment                   = var.environment
-  vpc_id                        = module.networking["main-vpc"].vpc_id
-  public_subnet_ids             = module.networking["main-vpc"].public_subnet_ids
-  application_port              = var.application_port
+  public_subnet_ids = module.networking["main-vpc"].public_subnet_ids
+  ami_id                        = var.ami_id
+  application_security_group_id = module.ec2.security_group_id
+  iam_instance_profile          = module.iam.instance_profile_name
+  target_group_arn              = module.alb.target_group_arn
+  key_name                      = var.key_name
+
+  user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
+    db_host        = split(":", module.rds.db_instance_endpoint)[0]
+    db_port        = module.rds.db_instance_port
+    db_name        = module.rds.db_instance_name
+    db_username    = module.rds.db_instance_username
+    db_password    = var.db_password
+    aws_region     = var.aws_region
+    s3_bucket_name = module.s3.bucket_name
+  }))
 }

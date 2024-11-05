@@ -37,6 +37,11 @@ variable "application_port" {
   type        = number
 }
 
+variable "key_name" {
+  description = "Name of the SSH key pair to use for EC2 instances"
+  type        = string
+}
+
 variable "database_port" {
   description = "Port on which the database runs"
   type        = number
