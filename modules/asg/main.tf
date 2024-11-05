@@ -17,6 +17,19 @@ resource "aws_launch_template" "app" {
 
   user_data = var.user_data
 
+  block_device_mappings {
+    device_name = "/dev/sda1" # Root device name for Ubuntu
+
+    ebs {
+      volume_size           = 25
+      volume_type           = "gp2"
+      encrypted             = true
+      delete_on_termination = true
+    }
+  }
+
+  disable_api_termination = false
+
   tag_specifications {
     resource_type = "instance"
     tags = {
