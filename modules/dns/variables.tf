@@ -8,7 +8,12 @@ variable "domain_name" {
   type        = string
 }
 
-variable "instance_public_ip" {
-  description = "Public IP address of the EC2 instance"
+variable "alb_dns_name" {
+  description = "DNS name of the ALB"
+  type        = string
+}
+
+variable "alb_zone_id" {
+  description = "Zone ID of the ALB"
   type        = string
 }

@@ -72,9 +72,10 @@ module "s3" {
 module "dns" {
   source = "../../modules/dns"
 
-  instance_public_ip = module.ec2.instance_public_ip
-  environment        = var.environment
-  domain_name        = var.domain_name
+  environment  = var.environment
+  domain_name  = var.domain_name
+  alb_dns_name = module.alb.alb_dns_name
+  alb_zone_id  = module.alb.alb_zone_id
 }
 
 module "iam" {
