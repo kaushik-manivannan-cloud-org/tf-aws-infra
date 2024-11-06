@@ -34,9 +34,9 @@ resource "aws_launch_template" "app" {
 # Auto Scaling Group
 resource "aws_autoscaling_group" "app" {
   name                      = "${var.environment}-app-asg"
-  desired_capacity          = 3
-  min_size                  = 3
-  max_size                  = 5
+  desired_capacity          = var.desired_capacity
+  min_size                  = var.min_size
+  max_size                  = var.max_size
   vpc_zone_identifier       = var.public_subnet_ids
   target_group_arns         = [var.target_group_arn]
   health_check_type         = "ELB"
@@ -87,7 +87,7 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu" {
   namespace           = "AWS/EC2"
   period              = "60"
   statistic           = "Average"
-  threshold           = "5" # Scale up when CPU > 5%
+  threshold           = var.scale_up_threshold # Scale up when CPU > 5%
   alarm_description   = "Scale up when CPU exceeds 5%"
   alarm_actions       = [aws_autoscaling_policy.scale_up.arn]
 
@@ -104,7 +104,7 @@ resource "aws_cloudwatch_metric_alarm" "low_cpu" {
   namespace           = "AWS/EC2"
   period              = "60"
   statistic           = "Average"
-  threshold           = "3" # Scale down when CPU < 3%
+  threshold           = var.scale_down_threshold # Scale down when CPU < 3%
   alarm_description   = "Scale down when CPU below 3%"
   alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
 
