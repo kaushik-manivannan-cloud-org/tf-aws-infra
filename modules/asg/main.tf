@@ -3,7 +3,7 @@ resource "aws_launch_template" "app" {
   name = "csye6225_asg"
 
   image_id      = var.ami_id
-  instance_type = "t2.micro"
+  instance_type = var.instance_type
   key_name      = var.key_name
 
   network_interfaces {

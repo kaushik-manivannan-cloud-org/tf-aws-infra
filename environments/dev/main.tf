@@ -87,6 +87,7 @@ module "asg" {
   environment                   = var.environment
   public_subnet_ids             = module.networking["main-vpc"].public_subnet_ids
   ami_id                        = var.ami_id
+  instance_type                 = var.instance_type
   application_security_group_id = module.ec2.security_group_id
   iam_instance_profile          = module.iam.instance_profile_name
   target_group_arn              = module.alb.target_group_arn

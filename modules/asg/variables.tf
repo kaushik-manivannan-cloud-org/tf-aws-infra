@@ -8,6 +8,11 @@ variable "ami_id" {
   type        = string
 }
 
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+}
+
 variable "application_security_group_id" {
   description = "ID of the application security group"
   type        = string
