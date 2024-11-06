@@ -29,14 +29,6 @@ resource "aws_launch_template" "app" {
   }
 
   disable_api_termination = false
-
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name        = "${var.environment}-app-server"
-      Environment = var.environment
-    }
-  }
 }
 
 # Auto Scaling Group
