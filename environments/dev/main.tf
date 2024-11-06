@@ -27,9 +27,9 @@ module "networking" {
 module "ec2" {
   source = "../../modules/ec2"
 
-  environment = var.environment
-  vpc_id      = module.networking["main-vpc"].vpc_id
-  application_port = var.application_port
+  environment           = var.environment
+  vpc_id                = module.networking["main-vpc"].vpc_id
+  application_port      = var.application_port
   alb_security_group_id = module.alb.security_group_id
 }
 
