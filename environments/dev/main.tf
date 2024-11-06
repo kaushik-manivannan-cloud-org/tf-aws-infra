@@ -27,22 +27,10 @@ module "networking" {
 module "ec2" {
   source = "../../modules/ec2"
 
-  environment          = var.environment
-  vpc_id               = module.networking["main-vpc"].vpc_id
-  subnet_id            = module.networking["main-vpc"].public_subnet_ids[0]
-  ami_id               = var.ami_id
-  instance_type        = var.instance_type
-  application_port     = var.application_port
-  iam_instance_profile = module.iam.instance_profile_name
-  user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
-    db_host        = split(":", module.rds.db_instance_endpoint)[0]
-    db_port        = module.rds.db_instance_port
-    db_name        = module.rds.db_instance_name
-    db_username    = module.rds.db_instance_username
-    db_password    = var.db_password
-    aws_region     = var.aws_region
-    s3_bucket_name = module.s3.bucket_name
-  }))
+  environment           = var.environment
+  vpc_id                = module.networking["main-vpc"].vpc_id
+  application_port      = var.application_port
+  alb_security_group_id = module.alb.security_group_id
 }
 
 module "rds" {
@@ -71,9 +59,10 @@ module "s3" {
 module "dns" {
   source = "../../modules/dns"
 
-  instance_public_ip = module.ec2.instance_public_ip
-  environment        = var.environment
-  domain_name        = var.domain_name
+  environment  = var.environment
+  domain_name  = var.domain_name
+  alb_dns_name = module.alb.alb_dns_name
+  alb_zone_id  = module.alb.alb_zone_id
 }
 
 module "iam" {
@@ -81,4 +70,36 @@ module "iam" {
 
   environment   = var.environment
   s3_bucket_arn = module.s3.bucket_arn
+}
+
+module "alb" {
+  source = "../../modules/alb"
+
+  environment       = var.environment
+  vpc_id            = module.networking["main-vpc"].vpc_id
+  public_subnet_ids = module.networking["main-vpc"].public_subnet_ids
+  application_port  = var.application_port
+}
+
+module "asg" {
+  source = "../../modules/asg"
+
+  environment                   = var.environment
+  public_subnet_ids             = module.networking["main-vpc"].public_subnet_ids
+  ami_id                        = var.ami_id
+  instance_type                 = var.instance_type
+  application_security_group_id = module.ec2.security_group_id
+  iam_instance_profile          = module.iam.instance_profile_name
+  target_group_arn              = module.alb.target_group_arn
+  key_name                      = var.key_name
+
+  user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
+    db_host        = split(":", module.rds.db_instance_endpoint)[0]
+    db_port        = module.rds.db_instance_port
+    db_name        = module.rds.db_instance_name
+    db_username    = module.rds.db_instance_username
+    db_password    = var.db_password
+    aws_region     = var.aws_region
+    s3_bucket_name = module.s3.bucket_name
+  }))
 }

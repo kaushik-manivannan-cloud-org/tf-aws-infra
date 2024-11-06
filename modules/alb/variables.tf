@@ -8,12 +8,12 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "public_subnet_ids" {
+  description = "List of public subnet IDs"
+  type        = list(string)
+}
+
 variable "application_port" {
   description = "Port on which the application runs"
   type        = number
-}
-
-variable "alb_security_group_id" {
-  description = "ID of the security group for the application load balancer"
-  type        = string
 }
