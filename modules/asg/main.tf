@@ -37,10 +37,6 @@ resource "aws_launch_template" "app" {
       Environment = var.environment
     }
   }
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # Auto Scaling Group
