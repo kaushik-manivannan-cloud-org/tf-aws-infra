@@ -87,3 +87,28 @@ variable "domain_name" {
   description = "Domain name"
   type        = string
 }
+
+variable "min_size" {
+  description = "Minimum number of instances in the Auto Scaling group"
+  type        = number
+}
+
+variable "max_size" {
+  description = "Maximum number of instances in the Auto Scaling group"
+  type        = number
+}
+
+variable "desired_capacity" {
+  description = "Desired number of instances in the Auto Scaling group"
+  type        = number
+}
+
+variable "scale_up_threshold" {
+  description = "CPU percentage to trigger scale up"
+  type        = string
+}
+
+variable "scale_down_threshold" {
+  description = "CPU percentage to trigger scale down"
+  type        = string
+}

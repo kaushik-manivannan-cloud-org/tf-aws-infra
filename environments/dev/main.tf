@@ -87,11 +87,16 @@ module "asg" {
   environment                   = var.environment
   public_subnet_ids             = module.networking["main-vpc"].public_subnet_ids
   ami_id                        = var.ami_id
+  min_size                      = var.min_size
+  max_size                      = var.max_size
+  desired_capacity              = var.desired_capacity
   instance_type                 = var.instance_type
   application_security_group_id = module.ec2.security_group_id
   iam_instance_profile          = module.iam.instance_profile_name
   target_group_arn              = module.alb.target_group_arn
   key_name                      = var.key_name
+  scale_up_threshold            = var.scale_up_threshold
+  scale_down_threshold          = var.scale_down_threshold
 
   user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
     db_host        = split(":", module.rds.db_instance_endpoint)[0]
