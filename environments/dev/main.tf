@@ -29,21 +29,8 @@ module "ec2" {
 
   environment = var.environment
   vpc_id      = module.networking["main-vpc"].vpc_id
-  # subnet_id             = module.networking["main-vpc"].public_subnet_ids[0]
-  # ami_id                = var.ami_id
-  # instance_type         = var.instance_type
   application_port = var.application_port
-  # iam_instance_profile  = module.iam.instance_profile_name
   alb_security_group_id = module.alb.security_group_id
-  # user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
-  #   db_host        = split(":", module.rds.db_instance_endpoint)[0]
-  #   db_port        = module.rds.db_instance_port
-  #   db_name        = module.rds.db_instance_name
-  #   db_username    = module.rds.db_instance_username
-  #   db_password    = var.db_password
-  #   aws_region     = var.aws_region
-  #   s3_bucket_name = module.s3.bucket_name
-  # }))
 }
 
 module "rds" {

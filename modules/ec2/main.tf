@@ -18,24 +18,6 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-# resource "aws_vpc_security_group_ingress_rule" "http" {
-#   security_group_id = aws_security_group.application.id
-#   description       = "Allow HTTP access"
-#   from_port         = 80
-#   to_port           = 80
-#   ip_protocol       = "tcp"
-#   cidr_ipv4         = "0.0.0.0/0"
-# }
-
-# resource "aws_vpc_security_group_ingress_rule" "https" {
-#   security_group_id = aws_security_group.application.id
-#   description       = "Allow HTTPS access"
-#   from_port         = 443
-#   to_port           = 443
-#   ip_protocol       = "tcp"
-#   cidr_ipv4         = "0.0.0.0/0"
-# }
-
 resource "aws_vpc_security_group_ingress_rule" "application" {
   security_group_id            = aws_security_group.application.id
   description                  = "Allow application port access"
@@ -51,28 +33,3 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
-
-# resource "aws_instance" "app_server" {
-#   ami           = var.ami_id
-#   instance_type = var.instance_type
-#   subnet_id     = var.subnet_id
-
-#   vpc_security_group_ids      = [aws_security_group.application.id]
-#   iam_instance_profile        = var.iam_instance_profile
-#   user_data_base64            = var.user_data
-#   user_data_replace_on_change = true
-
-#   root_block_device {
-#     volume_size           = 25
-#     volume_type           = "gp2"
-#     encrypted             = true
-#     delete_on_termination = true
-#   }
-
-#   disable_api_termination = false
-
-#   tags = {
-#     Name        = "${var.environment}-app-server"
-#     Environment = var.environment
-#   }
-# }
