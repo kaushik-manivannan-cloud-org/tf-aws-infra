@@ -9,6 +9,7 @@ DB_USER=${db_username}
 DB_PASSWORD=${db_password}
 AWS_REGION=${aws_region}
 S3_BUCKET_NAME=${s3_bucket_name}
+SNS_TOPIC_ARN=${sns_topic_arn}
 EOL
 
 # Set proper permissions

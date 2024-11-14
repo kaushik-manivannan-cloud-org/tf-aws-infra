@@ -112,3 +112,19 @@ variable "scale_down_threshold" {
   description = "CPU percentage to trigger scale down"
   type        = string
 }
+
+variable "sendgrid_api_key" {
+  description = "SendGrid API Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "sender_email" {
+  description = "Verified sender email for SendGrid"
+  type        = string
+}
+
+variable "lambda_zip_path" {
+  description = "Path to the Lambda function ZIP file"
+  type        = string
+}

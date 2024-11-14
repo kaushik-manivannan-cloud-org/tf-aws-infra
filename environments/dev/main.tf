@@ -70,6 +70,7 @@ module "iam" {
 
   environment   = var.environment
   s3_bucket_arn = module.s3.bucket_arn
+  sns_topic_arn = module.sns.topic_arn
 }
 
 module "alb" {
@@ -106,5 +107,24 @@ module "asg" {
     db_password    = var.db_password
     aws_region     = var.aws_region
     s3_bucket_name = module.s3.bucket_name
+    sns_topic_arn  = module.sns.topic_arn
   }))
+}
+
+module "sns" {
+  source = "../../modules/sns"
+
+  environment  = var.environment
+  ec2_role_arn = module.iam.instance_role_arn
+}
+
+module "lambda" {
+  source = "../../modules/lambda"
+
+  environment      = var.environment
+  lambda_zip_path  = var.lambda_zip_path
+  sendgrid_api_key = var.sendgrid_api_key
+  domain_name      = var.domain_name
+  sender_email     = var.sender_email
+  sns_topic_arn    = module.sns.topic_arn
 }

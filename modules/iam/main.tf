@@ -54,6 +54,13 @@ resource "aws_iam_role_policy" "ec2_policy" {
           var.s3_bucket_arn,
           "${var.s3_bucket_arn}/*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:Publish"
+        ]
+        Resource = [var.sns_topic_arn]
       }
     ]
   })
