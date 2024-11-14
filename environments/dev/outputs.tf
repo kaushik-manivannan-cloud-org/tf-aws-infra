@@ -75,3 +75,13 @@ output "database_security_group_id" {
   description = "ID of the database security group"
   value       = module.rds.security_group_id
 }
+
+output "sns_topic_arn" {
+  description = "ARN of the SNS topic for user verification"
+  value       = module.sns.topic_arn
+}
+
+output "lambda_function_name" {
+  description = "Name of the email verification Lambda function"
+  value       = module.lambda.function_name
+}
