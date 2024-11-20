@@ -23,8 +23,3 @@ variable "domain_name" {
   description = "Domain name for verification emails"
   type        = string
 }
-
-variable "sender_email" {
-  description = "Verified sender email for SendGrid"
-  type        = string
-}

@@ -70,7 +70,7 @@ resource "aws_lambda_function" "email_verification" {
     variables = {
       SENDGRID_API_KEY = var.sendgrid_api_key
       DOMAIN_NAME      = "${var.environment}.${var.domain_name}"
-      SENDER_EMAIL     = var.sender_email
+      SENDER_EMAIL     = "noreply@${var.environment}.${var.domain_name}"
     }
   }
 
