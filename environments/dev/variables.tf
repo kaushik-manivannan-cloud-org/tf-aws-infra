@@ -119,11 +119,6 @@ variable "sendgrid_api_key" {
   sensitive   = true
 }
 
-variable "sender_email" {
-  description = "Verified sender email for SendGrid"
-  type        = string
-}
-
 variable "lambda_zip_path" {
   description = "Path to the Lambda function ZIP file"
   type        = string
