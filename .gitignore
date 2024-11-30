@@ -229,4 +229,13 @@ terraform.rc
 .history
 .ionide
 
+### Certificates ###
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.priv
+*.ca-bundle
+
 # End of https://www.toptal.com/developers/gitignore/api/node,terraform,macos,visualstudiocode
