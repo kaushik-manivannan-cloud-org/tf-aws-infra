@@ -53,8 +53,13 @@ variable "db_username" {
   type        = string
 }
 
-variable "db_password" {
-  description = "Password for the master DB user"
+
+variable "db_credentials_arn" {
+  description = "ARN of the Secrets Manager secret containing database credentials"
   type        = string
-  sensitive   = true
+}
+
+variable "kms_key_arn" {
+  description = "ARN of KMS key for RDS encryption"
+  type        = string
 }

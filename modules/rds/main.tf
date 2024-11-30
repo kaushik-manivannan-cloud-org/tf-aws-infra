@@ -1,6 +1,19 @@
 # This file contains the terraform configuration to create an RDS instance
 # The RDS instance is created in the VPC created by the networking module
 
+# Get the password from Secrets Manager
+data "aws_secretsmanager_secret" "db_credentials" {
+  arn = var.db_credentials_arn
+}
+
+data "aws_secretsmanager_secret_version" "current" {
+  secret_id = data.aws_secretsmanager_secret.db_credentials.id
+}
+
+locals {
+  db_creds = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)
+}
+
 # Security group for the RDS instance
 resource "aws_security_group" "database" {
   name        = "${var.environment}-database-sg"
@@ -78,7 +91,7 @@ resource "aws_db_instance" "database" {
   # Database Configuration
   db_name  = var.db_name
   username = var.db_username
-  password = var.db_password
+  password = local.db_creds.password
 
   # Network Configuration
   db_subnet_group_name   = aws_db_subnet_group.database.name
@@ -91,6 +104,10 @@ resource "aws_db_instance" "database" {
   # Backup and Maintenance
   multi_az            = false
   skip_final_snapshot = true
+
+  # KMS encryption
+  storage_encrypted = true
+  kms_key_id        = var.kms_key_arn
 
   tags = {
     Name        = "${var.environment}-database"
