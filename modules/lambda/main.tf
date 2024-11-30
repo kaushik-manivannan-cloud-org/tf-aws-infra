@@ -42,6 +42,20 @@ resource "aws_iam_role_policy" "lambda_execution_policy" {
           "sns:Receive"
         ]
         Resource = [var.sns_topic_arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = [var.secrets_kms_key_arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [var.email_credentials_arn]
       }
     ]
   })
@@ -68,9 +82,9 @@ resource "aws_lambda_function" "email_verification" {
 
   environment {
     variables = {
-      SENDGRID_API_KEY = var.sendgrid_api_key
-      DOMAIN_NAME      = "${var.environment}.${var.domain_name}"
-      SENDER_EMAIL     = "noreply@${var.environment}.${var.domain_name}"
+      SECRETS_ARN  = var.email_credentials_arn
+      DOMAIN_NAME  = "${var.environment}.${var.domain_name}"
+      SENDER_EMAIL = "noreply@${var.environment}.${var.domain_name}"
     }
   }
 
