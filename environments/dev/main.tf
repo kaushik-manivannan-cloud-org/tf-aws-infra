@@ -9,7 +9,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
+  profile = var.environment
 }
 
 module "networking" {
@@ -87,6 +88,7 @@ module "alb" {
   vpc_id            = module.networking["main-vpc"].vpc_id
   public_subnet_ids = module.networking["main-vpc"].public_subnet_ids
   application_port  = var.application_port
+  certificate_arn   = module.acm.certificate_arn
 }
 
 module "asg" {
@@ -150,4 +152,10 @@ module "secrets" {
   environment      = var.environment
   kms_key_arn      = module.kms.secrets_key_arn
   sendgrid_api_key = var.sendgrid_api_key
+}
+
+module "acm" {
+  source      = "../../modules/acm"
+  environment = var.environment
+  domain_name = var.domain_name
 }

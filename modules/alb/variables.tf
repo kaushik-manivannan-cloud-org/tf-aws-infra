@@ -17,3 +17,8 @@ variable "application_port" {
   description = "Port on which the application runs"
   type        = number
 }
+
+variable "certificate_arn" {
+  description = "ARN of the SSL certificate"
+  type        = string
+}
