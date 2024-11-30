@@ -70,9 +70,14 @@ module "dns" {
 module "iam" {
   source = "../../modules/iam"
 
-  environment   = var.environment
-  s3_bucket_arn = module.s3.bucket_arn
-  sns_topic_arn = module.sns.topic_arn
+  environment         = var.environment
+  s3_bucket_arn       = module.s3.bucket_arn
+  sns_topic_arn       = module.sns.topic_arn
+  ec2_kms_key_arn     = module.kms.ec2_key_arn
+  rds_kms_key_arn     = module.kms.rds_key_arn
+  s3_kms_key_arn      = module.kms.s3_key_arn
+  secrets_kms_key_arn = module.kms.secrets_key_arn
+  db_credentials_arn  = module.secrets.db_credentials_arn
 }
 
 module "alb" {
@@ -103,14 +108,14 @@ module "asg" {
   kms_key_arn                   = module.kms.ec2_key_arn
 
   user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
-    db_host        = split(":", module.rds.db_instance_endpoint)[0]
-    db_port        = module.rds.db_instance_port
-    db_name        = module.rds.db_instance_name
-    db_username    = module.rds.db_instance_username
-    db_password    = var.db_password
-    aws_region     = var.aws_region
-    s3_bucket_name = module.s3.bucket_name
-    sns_topic_arn  = module.sns.topic_arn
+    db_host            = split(":", module.rds.db_instance_endpoint)[0]
+    db_port            = module.rds.db_instance_port
+    db_name            = module.rds.db_instance_name
+    db_username        = module.rds.db_instance_username
+    db_credentials_arn = module.secrets.db_credentials_arn
+    aws_region         = var.aws_region
+    s3_bucket_name     = module.s3.bucket_name
+    sns_topic_arn      = module.sns.topic_arn
   }))
 }
 
@@ -124,15 +129,25 @@ module "sns" {
 module "lambda" {
   source = "../../modules/lambda"
 
+  environment           = var.environment
+  lambda_zip_path       = var.lambda_zip_path
+  sendgrid_api_key      = var.sendgrid_api_key
+  domain_name           = var.domain_name
+  sns_topic_arn         = module.sns.topic_arn
+  secrets_kms_key_arn   = module.kms.secrets_key_arn
+  email_credentials_arn = module.secrets.email_credentials_arn
+}
+
 module "kms" {
   source            = "../../modules/kms"
   environment       = var.environment
   instance_role_arn = module.iam.instance_role_arn
   aws_region        = var.aws_region
 }
+
+module "secrets" {
+  source           = "../../modules/secrets"
   environment      = var.environment
-  lambda_zip_path  = var.lambda_zip_path
+  kms_key_arn      = module.kms.secrets_key_arn
   sendgrid_api_key = var.sendgrid_api_key
-  domain_name      = var.domain_name
-  sns_topic_arn    = module.sns.topic_arn
 }
