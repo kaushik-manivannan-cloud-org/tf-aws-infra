@@ -54,6 +54,7 @@ module "s3" {
   source = "../../modules/s3"
 
   environment = var.environment
+  kms_key_arn = module.kms.s3_key_arn
 }
 
 module "dns" {
