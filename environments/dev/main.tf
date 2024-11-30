@@ -121,6 +121,12 @@ module "sns" {
 module "lambda" {
   source = "../../modules/lambda"
 
+module "kms" {
+  source            = "../../modules/kms"
+  environment       = var.environment
+  instance_role_arn = module.iam.instance_role_arn
+  aws_region        = var.aws_region
+}
   environment      = var.environment
   lambda_zip_path  = var.lambda_zip_path
   sendgrid_api_key = var.sendgrid_api_key
