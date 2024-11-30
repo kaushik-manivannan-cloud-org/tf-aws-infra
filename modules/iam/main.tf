@@ -61,6 +61,27 @@ resource "aws_iam_role_policy" "ec2_policy" {
           "sns:Publish"
         ]
         Resource = [var.sns_topic_arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey*"
+        ]
+        Resource = [
+          var.ec2_kms_key_arn,
+          var.s3_kms_key_arn,
+          var.secrets_kms_key_arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [
+          var.db_credentials_arn
+        ]
       }
     ]
   })

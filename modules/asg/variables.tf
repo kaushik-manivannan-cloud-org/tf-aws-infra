@@ -67,3 +67,8 @@ variable "scale_down_threshold" {
   description = "CPU percentage to trigger scale down"
   type        = string
 }
+
+variable "kms_key_arn" {
+  description = "ARN of KMS key for EC2 encryption"
+  type        = string
+}

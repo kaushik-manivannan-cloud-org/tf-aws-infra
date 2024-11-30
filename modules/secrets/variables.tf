@@ -4,6 +4,11 @@ variable "environment" {
 }
 
 variable "kms_key_arn" {
-  description = "ARN of KMS key for S3 encryption"
+  description = "KMS key ARN"
+  type        = string
+}
+
+variable "sendgrid_api_key" {
+  description = "SendGrid API key"
   type        = string
 }
