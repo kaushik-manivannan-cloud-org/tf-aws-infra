@@ -100,6 +100,7 @@ module "asg" {
   key_name                      = var.key_name
   scale_up_threshold            = var.scale_up_threshold
   scale_down_threshold          = var.scale_down_threshold
+  kms_key_arn                   = module.kms.ec2_key_arn
 
   user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
     db_host        = split(":", module.rds.db_instance_endpoint)[0]

@@ -25,6 +25,7 @@ resource "aws_launch_template" "app" {
       volume_type           = "gp2"
       encrypted             = true
       delete_on_termination = true
+      kms_key_id            = var.kms_key_arn
     }
   }
 
