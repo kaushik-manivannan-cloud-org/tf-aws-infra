@@ -1,12 +1,27 @@
 #!/bin/bash
 
+#######################
+# Get Database Credentials
+#######################
+# Get database credentials from Secrets Manager
+DB_CREDENTIALS=$(aws secretsmanager get-secret-value \
+  --secret-id ${db_credentials_arn} \
+  --region ${aws_region} \
+  --query 'SecretString' \
+  --output text)
+
+DB_PASSWORD=$(echo $DB_CREDENTIALS | jq -r '.password')
+
+#######################
+# Configure Application
+#######################
 # Configure application environment variables
 cat > /opt/webapp/.env << EOL
 DB_HOST=${db_host}
 DB_PORT=${db_port}
 DB_NAME=${db_name}
 DB_USER=${db_username}
-DB_PASSWORD=${db_password}
+DB_PASSWORD=$DB_PASSWORD
 AWS_REGION=${aws_region}
 S3_BUCKET_NAME=${s3_bucket_name}
 SNS_TOPIC_ARN=${sns_topic_arn}
