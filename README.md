@@ -1,6 +1,6 @@
 # AWS Infrastructure as Code with Terraform
 
-A comprehensive Infrastructure as Code (IaC) solution for deploying a multi-tier application infrastructure on AWS using Terraform. This project sets up a complete networking stack, auto-scaling application servers, load balancer, database infrastructure, and S3 storage following AWS best practices.
+A comprehensive Infrastructure as Code (IaC) solution for deploying a multi-tier application infrastructure on AWS using Terraform. This project sets up a complete networking stack, auto-scaling application servers, load balancer, database infrastructure, S3 storage, and serverless components following AWS best practices.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -9,24 +9,29 @@ A comprehensive Infrastructure as Code (IaC) solution for deploying a multi-tier
 - [Directory Structure](#directory-structure)
 - [Module Description](#module-description)
 - [Infrastructure Components](#infrastructure-components)
+- [Security Features](#security-features)
 - [Configuration](#configuration)
+- [SSL Certificate Setup](#ssl-certificate-setup)
 - [Usage](#usage)
 - [CI/CD Integration](#cicd-integration)
-- [Best Practices](#best-practices)
+- [Logging and Monitoring](#logging-and-monitoring)
+- [Serverless Components](#serverless-components)
 
 ## Overview
 
 This Terraform project creates a production-ready AWS infrastructure with:
 - Multi-AZ VPC setup with public and private subnets
-- Application Load Balancer (ALB) for traffic distribution
+- Application Load Balancer (ALB) with SSL/TLS termination
 - Auto Scaling Group with customizable scaling policies
 - RDS PostgreSQL database in private subnets
-- S3 bucket for application assets
+- S3 bucket for application assets with server-side encryption
 - SNS topic for user verification emails
-- Lambda function for email processing
+- Lambda function for email processing using SendGrid
 - Route 53 DNS configuration
 - IAM roles with least-privilege access
 - CloudWatch monitoring and metrics collection
+- KMS keys for encryption at rest
+- AWS Secrets Manager for sensitive data
 
 ## Architecture
 
@@ -40,13 +45,22 @@ This Terraform project creates a production-ready AWS infrastructure with:
 │       ├── 10.0.4.0/24 (us-east-1a)
 │       ├── 10.0.5.0/24 (us-east-1b)
 │       └── 10.0.6.0/24 (us-east-1c)
-├── Application Load Balancer
+├── Application Load Balancer (HTTPS:443)
 ├── Auto Scaling Group
 │   └── EC2 Instances (t2.small)
+│       └── CloudWatch Agent
 ├── RDS PostgreSQL (db.t3.medium)
 ├── S3 Bucket
 ├── SNS Topic
-└── Lambda Function
+├── Lambda Function
+├── KMS Keys
+│   ├── EC2 Encryption
+│   ├── RDS Encryption
+│   ├── S3 Encryption
+│   └── Secrets Encryption
+└── Secrets Manager
+    ├── Database Password
+    └── SendGrid API Key
 ```
 
 ## Prerequisites
@@ -55,30 +69,42 @@ This Terraform project creates a production-ready AWS infrastructure with:
 - AWS CLI configured with appropriate credentials
 - AWS account with necessary permissions
 - Domain name configured in Route 53
-- SendGrid API key for email notifications
+- SSL certificate for your domain
+- SendGrid account and API key for email notifications
+- Node.js >= 18.x
+- Git for version control
+- PostgreSQL client for database management
+- Text editor or IDE for configuration management
 
 ## Directory Structure
 
 ```
 .
+├── .github/
+│   └── workflows/
+│       └── terraform-ci.yml   # CI/CD pipeline
 ├── environments/
 │   └── dev/
-│       ├── main.tf           # Main configuration
-│       ├── variables.tf      # Variable definitions
-│       ├── terraform.tfvars  # Variable values
-│       ├── outputs.tf        # Output definitions
-│       └── user_data.tpl     # EC2 user data template
-└── modules/
-    ├── networking/           # VPC and network resources
-    ├── ec2/                  # EC2 security groups
-    ├── rds/                  # RDS instance and configuration
-    ├── s3/                   # S3 bucket with lifecycle policies
-    ├── iam/                  # IAM roles and policies
-    ├── alb/                  # Application Load Balancer
-    ├── asg/                  # Auto Scaling Group
-    ├── sns/                  # SNS topic for notifications
-    ├── lambda/               # Lambda function configuration
-    └── dns/                  # Route 53 configuration
+│       ├── main.tf            # Main configuration
+│       ├── variables.tf       # Variable definitions
+│       ├── terraform.tfvars   # Variable values
+│       ├── outputs.tf         # Output definitions
+│       └── user_data.tpl      # EC2 user data template
+├── modules/
+│   ├── networking/            # VPC and network resources
+│   ├── ec2/                   # EC2 security groups
+│   ├── rds/                   # RDS instance and configuration
+│   ├── s3/                    # S3 bucket with lifecycle policies
+│   ├── iam/                   # IAM roles and policies
+│   ├── alb/                   # Application Load Balancer
+│   ├── asg/                   # Auto Scaling Group
+│   ├── sns/                   # SNS topic for notifications
+│   ├── lambda/                # Lambda function configuration
+│   ├── kms/                   # KMS keys for encryption
+│   ├── secrets/               # Secrets Manager resources
+│   ├── acm/                   # ACM certificate configuration
+│   └── dns/                   # Route 53 configuration
+└── ssl-certificates/          # SSL certificate files
 ```
 
 ## Module Description
@@ -88,12 +114,16 @@ This Terraform project creates a production-ready AWS infrastructure with:
 - Sets up public and private subnets across multiple AZs
 - Configures Internet Gateway and routing
 - Implements network isolation
+- Manages route tables and subnet associations
 
 ### ALB Module
 - Configures Application Load Balancer in public subnets
 - Implements health checks and routing rules
 - Manages security groups for load balancer access
-- Supports HTTP traffic on port 80
+- Supports HTTPS traffic on port 443
+- Handles SSL certificate integration
+- Configures target groups
+- Sets up listener rules
 
 ### ASG Module
 - Manages Auto Scaling Group with configurable capacity
@@ -106,6 +136,7 @@ This Terraform project creates a production-ready AWS infrastructure with:
 - Configures security groups for database access
 - Manages parameter groups and subnet groups
 - Supports automated backups
+- Configures encryption at rest
 
 ### S3 Module
 - Creates S3 bucket with encryption
@@ -117,6 +148,8 @@ This Terraform project creates a production-ready AWS infrastructure with:
 - Creates EC2 instance roles
 - Configures policies for CloudWatch, S3, and SNS access
 - Implements least-privilege access
+- Manages service-linked roles
+- Sets up cross-account access
 
 ### SNS Module
 - Creates topic for user verification emails
@@ -126,8 +159,26 @@ This Terraform project creates a production-ready AWS infrastructure with:
 ### Lambda Module
 - Deploys email verification function
 - Configures SendGrid integration
-- Manages CloudWatch logs
 - Sets up SNS trigger
+
+### KMS Module
+- Creates encryption keys for various services
+- Manages key policies
+- Configures key rotation
+- Sets up key aliases
+
+### Secrets Module
+- Manages sensitive configuration values
+- Configures encryption
+- Sets up access policies
+- Handles secret versioning
+
+### ACM Module
+- Manages SSL/TLS certificates
+
+### DNS Module
+- Configures Route 53 hosted zones
+- Manages DNS records
 
 ## Infrastructure Components
 
@@ -137,25 +188,59 @@ This Terraform project creates a production-ready AWS infrastructure with:
 - Scale up threshold: 5% CPU utilization
 - Scale down threshold: 3% CPU utilization
 - Instance type: t2.small
+- Health check grace period: 300 seconds
+- Default cooldown: 60 seconds
+- Desired capacity: 3
+- Termination policies: Default
+- Instance refresh: Enabled
 
 ### Database Configuration
 - Engine: PostgreSQL 14.13
 - Instance class: db.t3.medium
 - Storage: GP2 (General Purpose SSD)
+- Allocated storage: 10 GB
 - Multi-AZ: Disabled
 - Automated backups: Enabled
+- Backup retention period: 7 days
+- Performance Insights: Enabled
+- Enhanced monitoring: Enabled
+- Auto minor version upgrade: Enabled
+
+## Security Features
+
+### KMS Encryption
+- Separate KMS keys for EC2, RDS, S3, and Secrets Manager
+- Automatic key rotation enabled
+- Granular access control through key policies
+- Key usage monitoring
+- Cross-region key replication disabled
+- Custom key store: Disabled
+
+### Secrets Management
+- Database credentials stored in AWS Secrets Manager
+- SendGrid API key secured in Secrets Manager
+- Automatic secret rotation capability
+- KMS encryption for secrets
+- Secret versioning enabled
+
+### Network Security
+- Security groups with minimal required access
+- Private subnets for database and application layers
+- VPC endpoint policies
+- SSL/TLS termination at load balancer
+- VPC endpoints for AWS services
 
 ## Configuration
 
-Create a `terraform.tfvars` file in your environment directory with the following structure:
+Create a `terraform.tfvars` file in your environment directory:
 
 ```hcl
 # Region and Environment
 aws_region  = "us-east-1"
-environment = "dev"
+environment = "demo"
 
 # Domain Configuration
-domain_name = "your-domain.com"
+domain_name = "csye6225webapp.me"
 
 # Availability Zones
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -170,10 +255,19 @@ vpcs = {
 }
 
 # EC2 Configuration
-ami_id           = "ami-xxxxxxxx"
+ami_id           = "ami-055b7f1f42c061230"
 instance_type    = "t2.small"
 application_port = 3000
-key_name         = "your-ssh-key"
+key_name         = "demo-ssh-key"
+
+# Database Configuration
+database_port             = 5432
+db_parameter_group_family = "postgres14"
+db_engine                = "postgres"
+db_engine_version        = "14.13"
+db_instance_class        = "db.t3.medium"
+db_name                  = "csye6225"
+db_username              = "csye6225"
 
 # Auto Scaling Configuration
 min_size             = 3
@@ -182,19 +276,67 @@ desired_capacity     = 3
 scale_up_threshold   = "5"
 scale_down_threshold = "3"
 
-# Database Configuration
-database_port             = 5432
-db_parameter_group_family = "postgres14"
-db_engine                = "postgres"
-db_engine_version        = "14.13"
-db_instance_class        = "db.t3.medium"
-db_name                  = "your_database_name"
-db_username              = "your_username"
-db_password              = "your_password"
-
-# Email Configuration
+# Lambda Configuration
 sendgrid_api_key = "your-sendgrid-api-key"
-lambda_zip_path  = "path-to-your-lambda-zip-file"
+lambda_zip_path  = "../../../serverless/.serverless/user-verification.zip"
+```
+
+## SSL Certificate Setup
+
+### Dev Environment
+
+For the development environment, use AWS Certificate Manager (ACM) to provision your SSL certificate:
+
+1. Request a certificate through ACM:
+```bash
+aws acm request-certificate \
+  --domain-name dev.csye6225webapp.me \
+  --validation-method DNS \
+  --region us-east-1
+```
+
+2. Add the provided CNAME records to your DNS configuration for validation.
+
+3. Verify the certificate status:
+```bash
+aws acm list-certificates --region us-east-1
+```
+
+### Demo Environment
+
+For the demo environment, you must use a third-party SSL certificate (e.g., Namecheap) and import it into ACM:
+
+1. Create a directory for your SSL certificates in your project root:
+```bash
+mkdir ssl-certificates
+cd ssl-certificates
+```
+
+2. Place your purchased SSL certificate files in this directory:
+   - `demo_csye6225webapp_me.crt` (Your SSL certificate)
+   - `demo_csye6225webapp_me.ca-bundle` (Certificate chain/bundle)
+   - `private.key` (Private key)
+
+3. Verify your certificate files:
+```bash
+# List files to ensure they're in place
+ls -la
+```
+
+4. Import the certificate into AWS Certificate Manager:
+```bash
+aws acm import-certificate \
+  --certificate fileb://demo_csye6225webapp_me.crt \
+  --private-key fileb://private.key \
+  --certificate-chain fileb://demo_csye6225webapp_me.ca-bundle \
+  --region us-east-1
+```
+
+5. Verify the import was successful:
+```bash
+aws acm describe-certificate \
+  --certificate-arn <certificate-arn-from-previous-command> \
+  --region us-east-1
 ```
 
 ## Usage
@@ -219,37 +361,59 @@ terraform apply
 terraform destroy
 ```
 
-> **Note**: Always review the plan output before applying changes to production infrastructure.
-
 ## CI/CD Integration
 
-The project includes GitHub Actions workflows for:
-- Terraform format checking
-- Configuration validation
-- Infrastructure deployment
-- Security scanning
+GitHub Actions workflow includes:
 
-## Best Practices
+1. Terraform Format Check:
+```yaml
+- name: Terraform Format
+  run: terraform fmt -check -recursive
+```
 
-1. **State Management**
-   - Use remote state storage
-   - Enable state locking
-   - Implement state encryption
+2. Terraform Initialization:
+```yaml
+- name: Terraform Init
+  run: terraform init -backend=false
+```
 
-2. **Security**
-   - Implement least privilege access
-   - Use security groups effectively
-   - Encrypt sensitive data
-   - Keep secrets in secure storage
+3. Terraform Validation:
+```yaml
+- name: Terraform Validate
+  run: terraform validate
+```
 
-3. **High Availability**
-   - Deploy across multiple AZs
-   - Use Auto Scaling Groups
-   - Implement proper health checks
-   - Configure proper backup policies
+## Logging and Monitoring
 
-4. **Monitoring**
-   - Set up CloudWatch alarms
-   - Configure proper scaling policies
-   - Monitor application metrics
-   - Set up logging
+### CloudWatch Integration
+- Custom metrics for application monitoring
+- CPU utilization tracking
+- Memory usage monitoring
+- Disk I/O tracking
+- Network traffic monitoring
+- Custom metric dimensions
+
+### Application Logging
+- Centralized logging with CloudWatch Logs
+- Log retention policies
+- Log group organization
+- Structured logging format
+- Log streaming enabled
+
+## Serverless Components
+
+### Lambda Function
+- Node.js 18.x runtime
+- SendGrid integration for email sending
+- SNS topic subscription
+- CloudWatch Logs integration
+
+### Email Verification Flow
+1. User registration triggers SNS notification
+2. Lambda function processes SNS message
+3. SendGrid API sends verification email
+4. User clicks verification link
+5. Application verifies user account
+6. Account status updated in database
+7. Success/failure logging
+8. Metrics collection
