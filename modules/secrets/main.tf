@@ -2,6 +2,11 @@
 resource "random_password" "db_password" {
   length  = 16
   special = true
+  min_special      = 2
+  min_upper        = 2
+  min_lower        = 2
+  min_numeric      = 2
+  override_special = "!#$%^&*()-_=+[]{}<>:?"
 }
 
 # Database credentials secret
