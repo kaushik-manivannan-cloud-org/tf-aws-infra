@@ -1,7 +1,7 @@
 # Generate random password for RDS
 resource "random_password" "db_password" {
-  length  = 16
-  special = true
+  length           = 16
+  special          = true
   min_special      = 2
   min_upper        = 2
   min_lower        = 2
